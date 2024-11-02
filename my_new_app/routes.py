@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, send_from_directory
 from flask_login import login_user, current_user, logout_user, login_required
 from . import app, db
 from .forms import RegistrationForm, LoginForm, WorkoutForm, ExerciseForm
@@ -98,3 +98,34 @@ def workout(workout_id):
                          workout=workout,
                          form=form,
                          exercise_types=EXERCISE_TYPES)
+
+@app.route("/exercise_progress")
+@login_required
+def exercise_progress():
+    exercise_type = request.args.get('exercise_type')
+    
+    if exercise_type:
+        # Get all exercises of this type for the current user
+        history = Exercise.query.join(Workout).filter(
+            Workout.user_id == current_user.id,
+            Exercise.exercise_type == exercise_type
+        ).order_by(Workout.date).all()
+        
+        # Prepare data for plotting
+        dates = [exercise.workout.date.strftime('%m/%d/%y') for exercise in history]
+        weights = [float(exercise.weight) for exercise in history]
+    else:
+        history = []
+        dates = []
+        weights = []
+
+    return render_template('exercise_progress.html',
+                         exercise_types=EXERCISE_TYPES,
+                         selected_exercise=exercise_type,
+                         history=history,
+                         dates=dates,
+                         weights=weights)
+
+@app.route('/static/sw.js')
+def sw():
+    return send_from_directory('static', 'sw.js')
