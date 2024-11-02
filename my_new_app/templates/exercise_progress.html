@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-section">
+    <h2>Exercise Progress</h2>
+    
+    <form method="GET" action="{{ url_for('exercise_progress') }}" class="mb-4">
+        <div class="form-group">
+            <label for="exercise_type">Select Exercise:</label>
+            <select name="exercise_type" class="form-control" onchange="this.form.submit()">
+                <option value="">Choose an exercise...</option>
+                {% for exercise in exercise_types %}
+                    <option value="{{ exercise }}" {% if selected_exercise == exercise %}selected{% endif %}>
+                        {{ exercise }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+    {% if selected_exercise %}
+        <div id="progress-chart"></div>
+        
+        <table class="table mt-4">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Sets</th>
+                    <th>Reps</th>
+                    <th>Weight</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in history %}
+                    <tr>
+                        <td>{{ entry.workout.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ entry.sets }}</td>
+                        <td>{{ entry.reps }}</td>
+                        <td>{{ entry.weight }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+
+{% if selected_exercise %}
+    <!-- Add Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        var dates = {{ dates|tojson }};
+        var weights = {{ weights|tojson }};
+        
+        var trace = {
+            x: dates,
+            y: weights,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Weight Progress'
+        };
+
+        var layout = {
+            title: '{{ selected_exercise }} Progress',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Weight (lbs)'
+            }
+        };
+
+        Plotly.newPlot('progress-chart', [trace], layout);
+    </script>
+{% endif %}
+{% endblock content %}
