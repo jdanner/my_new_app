@@ -4,10 +4,6 @@
     {% if current_user.is_authenticated %}
         <div class="content-section">
             <h1>Welcome {{ current_user.username }}!</h1>
-            <div class="mb-4">
-                <a href="{{ url_for('new_workout') }}" class="btn btn-primary">New Workout</a>
-                <a href="{{ url_for('exercise_progress') }}" class="btn btn-info">Exercise Progress</a>
-            </div>
             
             {% if current_user.workouts %}
                 <h2>Your Workout History</h2>
@@ -20,7 +16,7 @@
                             </div>
                             <p class="mb-1">
                                 {% for exercise in workout.exercises %}
-                                    {{ exercise.exercise_type }}: {{ exercise.sets }}x{{ exercise.reps }} @ {{ exercise.weight }}lbs<br>
+                                    {{ exercise.exercise_type }}: {{ exercise.sets }}x{{ exercise.reps }} @ {{ exercise.weight }}
                                 {% endfor %}
                             </p>
                         </a>
