@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% if title %}
+        <title>Flask App - {{ title }}</title>
+    {% else %}
+        <title>Flask App</title>
+    {% endif %}
+</head>
+<body>
+    <header>
+        <nav>
+            <div>
+                <a href="{{ url_for('home') }}">Flask App</a>
+                <div>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('account') }}">Account</a>
+                        <a href="{{ url_for('logout') }}">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}">Login</a>
+                        <a href="{{ url_for('register') }}">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main role="main">
+        <div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</body>
+</html>

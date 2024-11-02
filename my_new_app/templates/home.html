@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to My New App</h1>
+        <p class="lead">This is a simple Flask application with user authentication.</p>
+        {% if current_user.is_authenticated %}
+            <p>Hello, {{ current_user.username }}!</p>
+        {% else %}
+            <p>Please <a href="{{ url_for('login') }}">login</a> or <a href="{{ url_for('register') }}">register</a>.</p>
+        {% endif %}
+    </div>
+{% endblock %}
