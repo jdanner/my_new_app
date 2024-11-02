@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request, send_from_directory
+from flask import render_template, url_for, flash, redirect, request, send_from_directory, current_app
 from flask_login import login_user, current_user, logout_user, login_required
 from . import app, db
 from .forms import RegistrationForm, LoginForm, WorkoutForm, ExerciseForm
@@ -18,6 +18,7 @@ EXERCISE_TYPES = [
 @app.route("/")
 @app.route("/home")
 def home():
+    current_app.logger.info('Home route accessed')
     return render_template("home.html")
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -102,6 +103,7 @@ def workout(workout_id):
 @app.route("/exercise_progress")
 @login_required
 def exercise_progress():
+    current_app.logger.info('Exercise progress route accessed')
     exercise_type = request.args.get('exercise_type')
     
     if exercise_type:
@@ -129,3 +131,23 @@ def exercise_progress():
 @app.route('/static/sw.js')
 def sw():
     return send_from_directory('static', 'sw.js')
+
+@app.route("/delete_exercise/<int:exercise_id>", methods=['POST'])
+@login_required
+def delete_exercise(exercise_id):
+    exercise = Exercise.query.get_or_404(exercise_id)
+    workout = Workout.query.get(exercise.workout_id)
+    
+    # Verify the exercise belongs to the current user
+    if workout.user_id != current_user.id:
+        flash('You cannot delete this exercise.', 'danger')
+        return redirect(url_for('home'))
+    
+    db.session.delete(exercise)
+    db.session.commit()
+    flash('Exercise deleted!', 'success')
+    
+    # If coming from exercise progress page, return there
+    if 'exercise_progress' in request.referrer:
+        return redirect(url_for('exercise_progress', exercise_type=exercise.exercise_type))
+    return redirect(url_for('workout', workout_id=workout.id))
