@@ -1,14 +1,23 @@
 from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
 from . import app, db
-from .forms import RegistrationForm, LoginForm
-from .models import User
+from .forms import RegistrationForm, LoginForm, WorkoutForm, ExerciseForm
+from .models import User, Workout, Exercise
+
+EXERCISE_TYPES = [
+    'Dumbbell chest press',
+    'Dumbbell bicep curls',
+    'Single dumbbell triceps raise',
+    'Dumbbell overhead press',
+    'Lat pull downs',
+    'Rows',
+    'Leg press',
+    'Calf press'
+]
 
 @app.route("/")
 @app.route("/home")
 def home():
-    if not current_user.is_authenticated:
-        return render_template("landing.html")
     return render_template("home.html")
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -49,3 +58,43 @@ def logout():
 @login_required
 def account():
     return render_template('account.html', title='Account')
+
+@app.route("/new_workout", methods=['GET', 'POST'])
+@login_required
+def new_workout():
+    form = WorkoutForm()
+    if form.validate_on_submit():
+        workout = Workout(date=form.date.data, user=current_user)
+        db.session.add(workout)
+        db.session.commit()
+        return redirect(url_for('workout', workout_id=workout.id))
+    return render_template('new_workout.html', title='New Workout', form=form)
+
+@app.route("/workout/<int:workout_id>", methods=['GET', 'POST'])
+@login_required
+def workout(workout_id):
+    workout = Workout.query.get_or_404(workout_id)
+    if workout.user != current_user:
+        flash('You cannot access this workout.', 'danger')
+        return redirect(url_for('home'))
+    
+    form = ExerciseForm()
+    if form.validate_on_submit():
+        exercise_type = request.form.get('exercise_type')
+        exercise = Exercise(
+            workout_id=workout.id,
+            exercise_type=exercise_type,
+            sets=form.sets.data,
+            reps=form.reps.data,
+            weight=form.weight.data
+        )
+        db.session.add(exercise)
+        db.session.commit()
+        flash(f'{exercise_type} added to workout!', 'success')
+        return redirect(url_for('workout', workout_id=workout.id))
+    
+    return render_template('workout.html', 
+                         title='Workout',
+                         workout=workout,
+                         form=form,
+                         exercise_types=EXERCISE_TYPES)

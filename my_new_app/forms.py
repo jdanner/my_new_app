@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, IntegerField, FloatField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from .models import User
 
@@ -29,3 +29,13 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+class ExerciseForm(FlaskForm):
+    sets = IntegerField('Sets', validators=[DataRequired()])
+    reps = IntegerField('Reps', validators=[DataRequired()])
+    weight = FloatField('Weight (lbs)', validators=[DataRequired()])
+    submit = SubmitField('Save Exercise')
+
+class WorkoutForm(FlaskForm):
+    date = DateField('Workout Date', validators=[DataRequired()])
+    submit = SubmitField('Start Workout')

@@ -1,12 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="jumbotron">
-        <h1 class="display-4">Welcome to My New App</h1>
-        <p class="lead">This is a simple Flask application with user authentication.</p>
-        {% if current_user.is_authenticated %}
-            <p>Hello, {{ current_user.username }}!</p>
-        {% else %}
-            <p>Please <a href="{{ url_for('login') }}">login</a> or <a href="{{ url_for('register') }}">register</a>.</p>
-        {% endif %}
-    </div>
+    {% if current_user.is_authenticated %}
+        <div class="content-section">
+            <h1>Welcome {{ current_user.username }}!</h1>
+            <a href="{{ url_for('new_workout') }}" class="btn btn-primary">New Workout</a>
+            
+            {% if current_user.workouts %}
+                <h2 class="mt-4">Your Recent Workouts:</h2>
+                <ul class="list-group">
+                    {% for workout in current_user.workouts|sort(attribute='date', reverse=true) %}
+                        <li class="list-group-item">
+                            <a href="{{ url_for('workout', workout_id=workout.id) }}">
+                                Workout on {{ workout.date.strftime('%Y-%m-%d') }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>You have no workouts yet. Start creating one!</p>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="content-section">
+            <h1>Welcome to My New App</h1>
+            <p>Please <a href="{{ url_for('login') }}">login</a> or <a href="{{ url_for('register') }}">register</a> to access your workouts.</p>
+        </div>
+    {% endif %}
 {% endblock %}
