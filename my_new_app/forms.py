@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, IntegerField, FloatField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from .models import User, Exercise
+from .models import User, Exercise, ExerciseType
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
@@ -33,9 +33,9 @@ class LoginForm(FlaskForm):
 class ExerciseForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(ExerciseForm, self).__init__(*args, **kwargs)
-        # Get choices from database
-        choices = [(t, t) for t in Exercise.get_unique_exercise_types()]
-        self.exercise_type.choices = choices
+        # Get choices from ExerciseType table
+        exercise_types = ExerciseType.query.order_by(ExerciseType.name).all()
+        self.exercise_type.choices = [(str(t.id), t.name) for t in exercise_types]
 
     exercise_type = SelectField('Exercise', validators=[DataRequired()])
     sets = IntegerField('Sets', validators=[DataRequired()])

@@ -13,5 +13,8 @@ migrate.init_app(app, db)
 bcrypt.init_app(app)
 login_manager.init_app(app)
 
+# Import models to register them with SQLAlchemy
+from my_new_app.models import User, Workout, Exercise, ExerciseType
+
 # Import routes at the bottom
 from my_new_app import routes

@@ -4,4 +4,7 @@ instance/
 *.py[cod]
 __pycache__/
 *.so
+.mode
 
+__pycache__/
+*.pyc

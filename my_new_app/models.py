@@ -26,15 +26,15 @@ class Workout(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     exercises = db.relationship('Exercise', backref='workout', lazy=True)
 
+class ExerciseType(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+
 class Exercise(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     workout_id = db.Column(db.Integer, db.ForeignKey('workout.id'), nullable=False)
-    exercise_type = db.Column(db.String(100), nullable=False)
+    exercise_type_id = db.Column(db.Integer, db.ForeignKey('exercise_type.id'))
+    exercise_type = db.relationship('ExerciseType', backref='exercises')
     sets = db.Column(db.Integer, nullable=False)
     reps = db.Column(db.Integer, nullable=False)
     weight = db.Column(db.Float, nullable=False)
-
-    @classmethod
-    def get_unique_exercise_types(cls):
-        """Get all unique exercise types from the database, sorted alphabetically"""
-        return sorted([r[0] for r in db.session.query(cls.exercise_type).distinct()])

@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, send_from_
 from flask_login import login_user, current_user, logout_user, login_required
 from . import app, db
 from .forms import RegistrationForm, LoginForm, WorkoutForm, ExerciseForm
-from .models import User, Workout, Exercise
+from .models import User, Workout, Exercise, ExerciseType
 from datetime import datetime
 
 @app.route("/")
@@ -71,37 +71,44 @@ def workout(workout_id):
     
     form = ExerciseForm()
     if form.validate_on_submit():
-        exercise_type = request.form.get('exercise_type')
+        exercise_type_id = int(form.exercise_type.data)
         exercise = Exercise(
             workout_id=workout.id,
-            exercise_type=exercise_type,
+            exercise_type_id=exercise_type_id,
             sets=form.sets.data,
             reps=form.reps.data,
             weight=form.weight.data
         )
         db.session.add(exercise)
         db.session.commit()
-        flash(f'{exercise_type} added to workout!', 'success')
+        
+        exercise_type = ExerciseType.query.get(exercise_type_id)
+        flash(f'{exercise_type.name} added to workout!', 'success')
         return redirect(url_for('workout', workout_id=workout.id))
     
     return render_template('workout.html', 
                          title='Workout',
                          workout=workout,
-                         form=form,
-                         exercise_types=Exercise.get_unique_exercise_types())
+                         form=form)
 
 @app.route("/exercise_progress")
 @login_required
 def exercise_progress():
     current_app.logger.info('Exercise progress route accessed')
-    exercise_type = request.args.get('exercise_type')
+    exercise_type_id = request.args.get('exercise_type')
     
-    if exercise_type:
+    # Get all exercise types for the dropdown
+    exercise_types = ExerciseType.query.order_by(ExerciseType.name).all()
+    
+    if exercise_type_id:
         # Get all exercises of this type for the current user
         history = Exercise.query.join(Workout).filter(
             Workout.user_id == current_user.id,
-            Exercise.exercise_type == exercise_type
+            Exercise.exercise_type_id == exercise_type_id
         ).order_by(Workout.date).all()
+        
+        selected_exercise = ExerciseType.query.get(exercise_type_id)
+        selected_exercise_name = selected_exercise.name if selected_exercise else None
         
         # Prepare data for plotting
         dates = [exercise.workout.date.strftime('%m/%d/%y') for exercise in history]
@@ -110,10 +117,11 @@ def exercise_progress():
         history = []
         dates = []
         weights = []
+        selected_exercise_name = None
 
     return render_template('exercise_progress.html',
-                         exercise_types=Exercise.get_unique_exercise_types(),
-                         selected_exercise=exercise_type,
+                         exercise_types=exercise_types,
+                         selected_exercise=selected_exercise_name,
                          history=history,
                          dates=dates,
                          weights=weights)
@@ -128,10 +136,12 @@ def delete_exercise(exercise_id):
     exercise = Exercise.query.get_or_404(exercise_id)
     workout = Workout.query.get(exercise.workout_id)
     
-    # Verify the exercise belongs to the current user
     if workout.user_id != current_user.id:
         flash('You cannot delete this exercise.', 'danger')
         return redirect(url_for('home'))
+    
+    # Get exercise type name before deleting
+    exercise_type_name = exercise.exercise_type.name if exercise.exercise_type else None
     
     db.session.delete(exercise)
     db.session.commit()
@@ -139,7 +149,7 @@ def delete_exercise(exercise_id):
     
     # If coming from exercise progress page, return there
     if 'exercise_progress' in request.referrer:
-        return redirect(url_for('exercise_progress', exercise_type=exercise.exercise_type))
+        return redirect(url_for('exercise_progress', exercise_type=exercise.exercise_type_id))
     return redirect(url_for('workout', workout_id=workout.id))
 
 @app.route("/delete_workout/<int:workout_id>", methods=['POST'])

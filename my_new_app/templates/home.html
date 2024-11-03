@@ -29,7 +29,7 @@
                             {% for exercise in workout.exercises %}
                                 <div class="d-flex justify-content-between align-items-center mt-2 ms-3">
                                     <div>
-                                        {{ exercise.exercise_type }}: {{ exercise.sets }}x{{ exercise.reps }} @ {{ exercise.weight }}lbs
+                                        {{ exercise.exercise_type.name }}: {{ exercise.sets }}x{{ exercise.reps }} @ {{ exercise.weight }}lbs
                                     </div>
                                     <form action="{{ url_for('delete_exercise', exercise_id=exercise.id) }}" 
                                           method="POST" 

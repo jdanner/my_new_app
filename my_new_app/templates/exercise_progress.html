@@ -9,9 +9,9 @@
             <label for="exercise_type">Select Exercise:</label>
             <select name="exercise_type" class="form-control" onchange="this.form.submit()">
                 <option value="">Choose an exercise...</option>
-                {% for exercise in exercise_types %}
-                    <option value="{{ exercise }}" {% if selected_exercise == exercise %}selected{% endif %}>
-                        {{ exercise }}
+                {% for exercise_type in exercise_types %}
+                    <option value="{{ exercise_type.id }}" {% if selected_exercise == exercise_type.name %}selected{% endif %}>
+                        {{ exercise_type.name }}
                     </option>
                 {% endfor %}
             </select>
