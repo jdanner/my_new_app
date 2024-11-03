@@ -1,7 +1,8 @@
-from my_new_app import app
+from my_new_app import create_app
 from my_new_app.extensions import db
 from my_new_app.models import User
 
+app = create_app()
 with app.app_context():
     db.create_all()
     
