@@ -7,19 +7,28 @@ Create Date: 2024-03-11 10:00:00.000000
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.sql import table, column
 
 # revision identifiers, used by Alembic.
 revision = 'manual_update_exercise_names'
-down_revision = None  # Get this from your last migration file
+down_revision = None
 branch_labels = None
 depends_on = None
 
 def upgrade():
-    exercises = table('exercise',
-        column('exercise_type', sa.String)
+    # First create the exercise table if it doesn't exist
+    op.create_table(
+        'exercise',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('exercise_type', sa.String(length=100), nullable=False),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    # Then define the table for updates
+    exercises = sa.table('exercise',
+        sa.column('exercise_type', sa.String)
     )
     
+    # Now do the updates
     op.execute(
         exercises.update().where(
             exercises.c.exercise_type == 'Bench Press'
@@ -37,8 +46,8 @@ def upgrade():
     )
 
 def downgrade():
-    exercises = table('exercise',
-        column('exercise_type', sa.String)
+    exercises = sa.table('exercise',
+        sa.column('exercise_type', sa.String)
     )
     
     op.execute(
@@ -56,3 +65,6 @@ def downgrade():
             exercise_type = 'Barbell Row'
         )
     )
+
+    # Drop the table in downgrade if needed
+    op.drop_table('exercise')
