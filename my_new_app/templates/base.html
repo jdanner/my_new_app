@@ -25,6 +25,29 @@
             color: white;
             font-weight: bold;
             font-size: 1.2rem;
+            text-decoration: none;
+        }
+        .nav-btn {
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            margin-left: 10px;
+            border-radius: 4px;
+        }
+        .nav-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .nav-btn.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 8px;
+            }
+            .nav-btn {
+                padding: 4px 8px;
+            }
         }
     </style>
 </head>
@@ -34,12 +57,18 @@
             <a class="navbar-brand" href="{{ url_for('home') }}">Workout</a>
             <div>
                 {% if current_user.is_authenticated %}
-                    <a class="btn btn-outline-light" href="{{ url_for('new_workout') }}">New Workout</a>
-                    <a class="btn btn-outline-light" href="{{ url_for('exercise_progress') }}">Progress</a>
-                    <a class="btn btn-outline-light" href="{{ url_for('logout') }}">Logout</a>
+                    <a class="nav-btn {% if request.endpoint == 'home' %}active{% endif %}" 
+                       href="{{ url_for('home') }}">Home</a>
+                    <a class="nav-btn {% if request.endpoint == 'new_workout' %}active{% endif %}" 
+                       href="{{ url_for('new_workout') }}">New</a>
+                    <a class="nav-btn {% if request.endpoint == 'exercise_progress' %}active{% endif %}" 
+                       href="{{ url_for('exercise_progress') }}">Progress</a>
+                    <a class="nav-btn" href="{{ url_for('logout') }}">Logout</a>
                 {% else %}
-                    <a class="btn btn-outline-light" href="{{ url_for('login') }}">Login</a>
-                    <a class="btn btn-outline-light" href="{{ url_for('register') }}">Register</a>
+                    <a class="nav-btn {% if request.endpoint == 'login' %}active{% endif %}" 
+                       href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-btn {% if request.endpoint == 'register' %}active{% endif %}" 
+                       href="{{ url_for('register') }}">Register</a>
                 {% endif %}
             </div>
         </div>

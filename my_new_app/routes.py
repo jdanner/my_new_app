@@ -3,17 +3,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from . import app, db
 from .forms import RegistrationForm, LoginForm, WorkoutForm, ExerciseForm
 from .models import User, Workout, Exercise
-
-EXERCISE_TYPES = [
-    'Dumbbell chest press',
-    'Dumbbell bicep curls',
-    'Single dumbbell triceps raise',
-    'Dumbbell overhead press',
-    'Lat pull downs',
-    'Rows',
-    'Leg press',
-    'Calf press'
-]
+from datetime import datetime
 
 @app.route("/")
 @app.route("/home")
@@ -98,7 +88,7 @@ def workout(workout_id):
                          title='Workout',
                          workout=workout,
                          form=form,
-                         exercise_types=EXERCISE_TYPES)
+                         exercise_types=Exercise.get_unique_exercise_types())
 
 @app.route("/exercise_progress")
 @login_required
@@ -122,7 +112,7 @@ def exercise_progress():
         weights = []
 
     return render_template('exercise_progress.html',
-                         exercise_types=EXERCISE_TYPES,
+                         exercise_types=Exercise.get_unique_exercise_types(),
                          selected_exercise=exercise_type,
                          history=history,
                          dates=dates,
@@ -150,4 +140,38 @@ def delete_exercise(exercise_id):
     # If coming from exercise progress page, return there
     if 'exercise_progress' in request.referrer:
         return redirect(url_for('exercise_progress', exercise_type=exercise.exercise_type))
+    return redirect(url_for('workout', workout_id=workout.id))
+
+@app.route("/delete_workout/<int:workout_id>", methods=['POST'])
+@login_required
+def delete_workout(workout_id):
+    workout = Workout.query.get_or_404(workout_id)
+    
+    # Verify the workout belongs to the current user
+    if workout.user_id != current_user.id:
+        flash('You cannot delete this workout.', 'danger')
+        return redirect(url_for('home'))
+    
+    # Delete all associated exercises first
+    Exercise.query.filter_by(workout_id=workout.id).delete()
+    
+    db.session.delete(workout)
+    db.session.commit()
+    flash('Workout deleted!', 'success')
+    return redirect(url_for('home'))
+
+@app.route("/update_workout_date/<int:workout_id>", methods=['POST'])
+@login_required
+def update_workout_date(workout_id):
+    workout = Workout.query.get_or_404(workout_id)
+    if workout.user_id != current_user.id:
+        flash('You cannot modify this workout.', 'danger')
+        return redirect(url_for('home'))
+    
+    new_date = request.form.get('date')
+    if new_date:
+        workout.date = datetime.strptime(new_date, '%Y-%m-%d')
+        db.session.commit()
+        flash('Workout date updated!', 'success')
+    
     return redirect(url_for('workout', workout_id=workout.id))

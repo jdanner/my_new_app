@@ -33,3 +33,8 @@ class Exercise(db.Model):
     sets = db.Column(db.Integer, nullable=False)
     reps = db.Column(db.Integer, nullable=False)
     weight = db.Column(db.Float, nullable=False)
+
+    @classmethod
+    def get_unique_exercise_types(cls):
+        """Get all unique exercise types from the database, sorted alphabetically"""
+        return sorted([r[0] for r in db.session.query(cls.exercise_type).distinct()])
