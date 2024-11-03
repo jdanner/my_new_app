@@ -1,4 +1,8 @@
 my_new_app/__pycache__/
 instance/
 migrations/
+# Python
+*.py[cod]
+__pycache__/
+*.so
 
