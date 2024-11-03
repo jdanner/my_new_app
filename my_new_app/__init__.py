@@ -1,17 +1,16 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
-from flask_migrate import Migrate
-import os
+from my_new_app.extensions import db, migrate, bcrypt
 
 app = Flask(__name__)
-# Use environment variable for secret key, with a default for development
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-please-change-in-production')
+
+# Configure the app
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+app.config['SECRET_KEY'] = 'your-secret-key'  # Make sure this is set
 
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+# Initialize extensions
+db.init_app(app)
+migrate.init_app(app, db)
+bcrypt.init_app(app)
 
+# Import routes at the bottom to avoid circular imports
 from my_new_app import routes
