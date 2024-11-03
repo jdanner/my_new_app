@@ -17,22 +17,24 @@ depends_on = None
 
 
 def upgrade():
-    # Add our standard exercises
-    op.execute(
-        """
-        INSERT INTO exercise_type (name) VALUES 
-        ('Dumbbell Chest Press'),
-        ('Dumbbell Biceps Curl'),
-        ('Dumbbell Lat Raise'),
-        ('Dumbbell Overhead Press'),
-        ('Lat Pulldowns'),
-        ('Rows'),
-        ('Leg Press'),
-        ('Calf Press'),
-        ('Leg Curl'),
-        ('Face Pulls');
-        """
+    # First create the table
+    op.create_table('exercise_type',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('name', sa.String(length=100), nullable=False),
+        sa.PrimaryKeyConstraint('id')
     )
+    
+    # Then insert the data
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Dumbbell Chest Press')")
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Dumbbell Biceps Curl')")
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Dumbbell Lat Raise')")
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Dumbbell Overhead Press')")
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Lat Pulldowns')")
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Rows')")
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Leg Press')")
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Calf Press')")
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Leg Curl')")
+    op.execute("INSERT INTO exercise_type (name) VALUES ('Face Pulls')")
     
     # Modify exercise table
     with op.batch_alter_table('exercise', schema=None) as batch_op:
@@ -50,3 +52,5 @@ def downgrade():
         batch_op.add_column(sa.Column('exercise_type', sa.VARCHAR(length=100), nullable=False))
         batch_op.drop_constraint('fk_exercise_exercise_type', type_='foreignkey')
         batch_op.drop_column('exercise_type_id')
+
+    op.drop_table('exercise_type')
