@@ -6,13 +6,11 @@ app = Flask(__name__)
 
 # Configure the app
 if os.environ.get('RENDER'):
-    # Use Render's persistent storage path
-    db_path = '/opt/render/project/data/site.db'
-    os.makedirs('/opt/render/project/data', exist_ok=True)
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
-    print(f"Using database at: {db_path}")
-    print(f"Directory exists: {os.path.exists('/opt/render/project/data')}")
-    print(f"Directory writable: {os.access('/opt/render/project/data', os.W_OK)}")
+    # Fix Render's Postgres URL if needed (they use postgres:// instead of postgresql://)
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 else:
     # Local development
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
