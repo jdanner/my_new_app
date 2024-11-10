@@ -69,6 +69,11 @@ def workout(workout_id):
         flash('You cannot access this workout.', 'danger')
         return redirect(url_for('home'))
     
+    # If workout doesn't exist, redirect to home
+    if not workout:
+        flash('That workout no longer exists.', 'info')
+        return redirect(url_for('home'))
+    
     form = ExerciseForm()
     if form.validate_on_submit():
         exercise_type_id = int(form.exercise_type.data)
@@ -185,3 +190,8 @@ def update_workout_date(workout_id):
         flash('Workout date updated!', 'success')
     
     return redirect(url_for('workout', workout_id=workout.id))
+
+@app.errorhandler(404)
+def not_found_error(error):
+    flash('The page you requested does not exist.', 'info')
+    return redirect(url_for('home'))
