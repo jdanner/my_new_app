@@ -4,6 +4,14 @@ import os
 
 app = Flask(__name__)
 
+# Debug directory access
+if os.environ.get('RENDER'):
+    instance_path = '/opt/render/project/src/instance'
+    os.makedirs(instance_path, exist_ok=True)
+    print(f"Instance directory: {instance_path}")
+    print(f"Directory exists: {os.path.exists(instance_path)}")
+    print(f"Directory writable: {os.access(instance_path, os.W_OK)}")
+
 # Configure the app
 if os.environ.get('RENDER'):
     # Use persistent path on Render
