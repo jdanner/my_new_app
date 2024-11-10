@@ -1,10 +1,25 @@
-const CACHE_NAME = 'workout-tracker-v1';
+const CACHE_NAME = 'workout-tracker-v2';
 const urlsToCache = [
     '/',
     '/static/manifest.json',
     'https://cdn.jsdelivr.net/npm/chart.js',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css'
 ];
+
+// Clear old caches on activation
+self.addEventListener('activate', function(event) {
+    event.waitUntil(
+        caches.keys().then(function(cacheNames) {
+            return Promise.all(
+                cacheNames.map(function(cacheName) {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+});
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
@@ -16,13 +31,14 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+    // Don't cache API requests or form submissions
+    if (event.request.method !== 'GET') {
+        return event.respondWith(fetch(event.request));
+    }
+
     event.respondWith(
-        caches.match(event.request)
-            .then(function(response) {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            })
+        fetch(event.request).catch(function() {
+            return caches.match(event.request);
+        })
     );
 });
