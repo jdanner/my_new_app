@@ -1,10 +1,17 @@
 from flask import Flask
 from my_new_app.extensions import db, migrate, bcrypt, login_manager
+import os
 
 app = Flask(__name__)
 
 # Configure the app
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+if os.environ.get('RENDER'):
+    # Use persistent path on Render
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////opt/render/project/src/instance/site.db'
+else:
+    # Use local path for development
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+
 app.config['SECRET_KEY'] = 'your-secret-key'
 
 # Initialize extensions
