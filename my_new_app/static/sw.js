@@ -30,15 +30,8 @@ self.addEventListener('install', function(event) {
     );
 });
 
+// Disable all caching and interception
 self.addEventListener('fetch', function(event) {
-    // Don't cache API requests or form submissions
-    if (event.request.method !== 'GET') {
-        return event.respondWith(fetch(event.request));
-    }
-
-    event.respondWith(
-        fetch(event.request).catch(function() {
-            return caches.match(event.request);
-        })
-    );
+    // Just pass through to network
+    return;
 });
