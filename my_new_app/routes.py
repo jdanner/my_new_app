@@ -131,10 +131,6 @@ def exercise_progress():
                          dates=dates,
                          weights=weights)
 
-@app.route('/static/sw.js')
-def sw():
-    return send_from_directory('static', 'sw.js')
-
 @app.route("/delete_exercise/<int:exercise_id>", methods=['POST'])
 @login_required
 def delete_exercise(exercise_id):
