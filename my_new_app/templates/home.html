@@ -3,7 +3,7 @@
 {% block content %}
     {% if current_user.is_authenticated %}
         <div class="content-section">
-            <h1>Welcome {{ current_user.username }}!</h1>
+            <h1>Welcome!</h1>
             
             {% if current_user.workouts %}
                 <h2>Your Workout History</h2>
