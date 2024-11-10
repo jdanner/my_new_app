@@ -6,13 +6,13 @@ app = Flask(__name__)
 
 # Configure the app
 if os.environ.get('RENDER'):
-    # Use the mounted disk directory
-    db_path = '/var/data/site.db'
-    os.makedirs('/var/data', exist_ok=True)
+    # Use Render's persistent storage path
+    db_path = '/opt/render/project/data/site.db'
+    os.makedirs('/opt/render/project/data', exist_ok=True)
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     print(f"Using database at: {db_path}")
-    print(f"Directory exists: {os.path.exists('/var/data')}")
-    print(f"Directory writable: {os.access('/var/data', os.W_OK)}")
+    print(f"Directory exists: {os.path.exists('/opt/render/project/data')}")
+    print(f"Directory writable: {os.access('/opt/render/project/data', os.W_OK)}")
 else:
     # Local development
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
